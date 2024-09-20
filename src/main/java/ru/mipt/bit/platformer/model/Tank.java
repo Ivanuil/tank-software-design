@@ -6,11 +6,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Rectangle;
 import ru.mipt.bit.platformer.util.TileMovement;
+import ru.mipt.bit.platformer.view.GraphicsObject;
 
 import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class Tank {
+public class Tank implements GraphicsObject {
 
     // Texture decodes an image file and loads it into GPU memory, it represents a native resource
     private final Texture texture = new Texture("images/tank_blue.png");
@@ -49,7 +50,7 @@ public class Tank {
     public void moveModel(MovementDirection movementDirection, GridPoint2 obstacleCoordinates) {
         if (isEqual(movementProgress, 1f)) {
             // check potential player destination for collision with obstacles
-            GridPoint2 potentialDestination = movementDirection.getDestinationCoordinates(coordinates);
+            GridPoint2 potentialDestination = new GridPoint2(coordinates).add(movementDirection.getMovementVector());
             if (!obstacleCoordinates.equals(potentialDestination)) {
                 destinationCoordinates = potentialDestination;
                 movementProgress = 0f;

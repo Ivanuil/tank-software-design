@@ -14,7 +14,10 @@ import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.model.Tank;
 import ru.mipt.bit.platformer.model.Tree;
+import ru.mipt.bit.platformer.util.KeyListener;
 import ru.mipt.bit.platformer.util.TileMovement;
+
+import java.util.List;
 
 import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
@@ -27,6 +30,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     private TiledMap level;
     private MapRenderer levelRenderer;
     private TileMovement tileMovement;
+    private KeyListener keyListener = new KeyListener();
 
     private Tree tree;
     private Tank tank;
@@ -43,6 +47,15 @@ public class GameDesktopLauncher implements ApplicationListener {
 
         tree = new Tree(groundLayer);
         tank = new Tank();
+
+        keyListener.addKeyPressedCallback(List.of(UP, W), () ->
+                tank.moveModel(MovementDirection.UP, tree.getCoordinates()));
+        keyListener.addKeyPressedCallback(List.of(LEFT, A), () ->
+                tank.moveModel(MovementDirection.LEFT, tree.getCoordinates()));
+        keyListener.addKeyPressedCallback(List.of(DOWN, S), () ->
+                tank.moveModel(MovementDirection.DOWN, tree.getCoordinates()));
+        keyListener.addKeyPressedCallback(List.of(RIGHT, D), () ->
+                tank.moveModel(MovementDirection.RIGHT, tree.getCoordinates()));
     }
 
     @Override
@@ -54,18 +67,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         // get time passed since the last render
         float deltaTime = Gdx.graphics.getDeltaTime();
 
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            tank.moveModel(MovementDirection.UP, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            tank.moveModel(MovementDirection.LEFT, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            tank.moveModel(MovementDirection.DOWN, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            tank.moveModel(MovementDirection.RIGHT, tree.getCoordinates());
-        }
+        keyListener.checkPressedKeys(Gdx.input);
 
         tank.moveImage(tileMovement, deltaTime);
 

@@ -6,10 +6,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Rectangle;
+import ru.mipt.bit.platformer.view.GraphicsObject;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class Tree {
+public class Tree implements GraphicsObject {
 
     private final Texture texture = new Texture("images/greenTree.png");
     private final TextureRegion graphics = new TextureRegion(texture);
