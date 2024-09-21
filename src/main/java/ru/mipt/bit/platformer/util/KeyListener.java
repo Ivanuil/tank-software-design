@@ -6,22 +6,35 @@ import java.util.*;
 
 public class KeyListener {
 
-    Map<Integer, List<Runnable>> callbacks = new HashMap<>();
+    List<KeyBinding> keyBindings = new ArrayList<>();
 
     public void addKeyPressedCallback(Collection<Integer> keyCodes, Runnable runnable) {
-        keyCodes.forEach(keyCode -> addKeyPressedCallback(keyCode, runnable));
-    }
-
-    public void addKeyPressedCallback(int keyCode, Runnable runnable) {
-        var runnableList = callbacks.getOrDefault(keyCode, new ArrayList<>());
-        runnableList.add(runnable);
-        callbacks.put(keyCode, runnableList);
+        keyBindings.add(new KeyBinding(keyCodes, runnable));
     }
 
     public void checkPressedKeys(Input input) {
-        for (var entry : callbacks.entrySet()) {
-            if (input.isKeyPressed(entry.getKey()))
-                entry.getValue().forEach(Runnable::run);
+        for (var binding : keyBindings) {
+            if (binding.getKeyCodes().stream().anyMatch(input::isKeyPressed))
+                binding.getCallBack().run();
+        }
+    }
+
+    private static class KeyBinding {
+
+        public KeyBinding(Collection<Integer> keyCodes, Runnable callBack) {
+            this.keyCodes = keyCodes;
+            this.callBack = callBack;
+        }
+
+        private final Collection<Integer> keyCodes;
+        private final Runnable callBack;
+
+        public Collection<Integer> getKeyCodes() {
+            return keyCodes;
+        }
+
+        public Runnable getCallBack() {
+            return callBack;
         }
     }
 
