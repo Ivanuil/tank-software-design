@@ -12,9 +12,12 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.model.MovementDirection;
-import ru.mipt.bit.platformer.model.Tank;
-import ru.mipt.bit.platformer.model.Tree;
+import ru.mipt.bit.platformer.view.TankGraphics;
+import ru.mipt.bit.platformer.view.TreeGraphics;
+import ru.mipt.bit.platformer.util.KeyListener;
 import ru.mipt.bit.platformer.util.TileMovement;
+
+import java.util.List;
 
 import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
@@ -27,9 +30,10 @@ public class GameDesktopLauncher implements ApplicationListener {
     private TiledMap level;
     private MapRenderer levelRenderer;
     private TileMovement tileMovement;
+    private final KeyListener keyListener = new KeyListener();
 
-    private Tree tree;
-    private Tank tank;
+    private TreeGraphics treeGraphics;
+    private TankGraphics tankGraphics;
 
     @Override
     public void create() {
@@ -41,8 +45,17 @@ public class GameDesktopLauncher implements ApplicationListener {
         TiledMapTileLayer groundLayer = getSingleLayer(level);
         tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
 
-        tree = new Tree(groundLayer);
-        tank = new Tank();
+        treeGraphics = new TreeGraphics(groundLayer);
+        tankGraphics = new TankGraphics();
+
+        keyListener.addKeyPressedCallback(List.of(UP, W), () ->
+                tankGraphics.moveModel(MovementDirection.UP, treeGraphics.getCoordinates()));
+        keyListener.addKeyPressedCallback(List.of(LEFT, A), () ->
+                tankGraphics.moveModel(MovementDirection.LEFT, treeGraphics.getCoordinates()));
+        keyListener.addKeyPressedCallback(List.of(DOWN, S), () ->
+                tankGraphics.moveModel(MovementDirection.DOWN, treeGraphics.getCoordinates()));
+        keyListener.addKeyPressedCallback(List.of(RIGHT, D), () ->
+                tankGraphics.moveModel(MovementDirection.RIGHT, treeGraphics.getCoordinates()));
     }
 
     @Override
@@ -54,20 +67,9 @@ public class GameDesktopLauncher implements ApplicationListener {
         // get time passed since the last render
         float deltaTime = Gdx.graphics.getDeltaTime();
 
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            tank.moveModel(MovementDirection.UP, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            tank.moveModel(MovementDirection.LEFT, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            tank.moveModel(MovementDirection.DOWN, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            tank.moveModel(MovementDirection.RIGHT, tree.getCoordinates());
-        }
+        keyListener.checkPressedKeys(Gdx.input);
 
-        tank.moveImage(tileMovement, deltaTime);
+        tankGraphics.moveImage(tileMovement, deltaTime);
 
         // render each tile of the level
         levelRenderer.render();
@@ -75,8 +77,8 @@ public class GameDesktopLauncher implements ApplicationListener {
         // start recording all drawing commands
         batch.begin();
 
-        tank.render(batch);
-        tree.render(batch);
+        tankGraphics.render(batch);
+        treeGraphics.render(batch);
 
         // submit all drawing requests
         batch.end();
@@ -100,8 +102,8 @@ public class GameDesktopLauncher implements ApplicationListener {
     @Override
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
-        tree.dispose();
-        tank.dispose();
+        treeGraphics.dispose();
+        tankGraphics.dispose();
         level.dispose();
         batch.dispose();
     }
