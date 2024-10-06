@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.model.MovementDirection;
+import ru.mipt.bit.platformer.view.Obstacle;
 import ru.mipt.bit.platformer.view.TankGraphics;
 import ru.mipt.bit.platformer.view.TreeGraphics;
 import ru.mipt.bit.platformer.util.KeyListener;
@@ -33,7 +34,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     private TileMovement tileMovement;
     private final KeyListener keyListener = new KeyListener();
 
-    private TreeGraphics treeGraphics;
+    private Obstacle obstacle;
     private TankGraphics tankGraphics;
 
     @Override
@@ -46,17 +47,17 @@ public class GameDesktopLauncher implements ApplicationListener {
         TiledMapTileLayer groundLayer = getSingleLayer(level);
         tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
 
-        treeGraphics = new TreeGraphics(groundLayer, "images/greenTree.png", new GridPoint2(2, 3));
+        obstacle = new TreeGraphics(groundLayer, "images/greenTree.png", new GridPoint2(2, 3));
         tankGraphics = new TankGraphics(0.4f, "images/tank_blue.png");
 
         keyListener.addKeyPressedCallback(List.of(UP, W), () ->
-                tankGraphics.moveModel(MovementDirection.UP, treeGraphics.getCoordinates()));
+                tankGraphics.moveModel(MovementDirection.UP, obstacle.getCoordinates()));
         keyListener.addKeyPressedCallback(List.of(LEFT, A), () ->
-                tankGraphics.moveModel(MovementDirection.LEFT, treeGraphics.getCoordinates()));
+                tankGraphics.moveModel(MovementDirection.LEFT, obstacle.getCoordinates()));
         keyListener.addKeyPressedCallback(List.of(DOWN, S), () ->
-                tankGraphics.moveModel(MovementDirection.DOWN, treeGraphics.getCoordinates()));
+                tankGraphics.moveModel(MovementDirection.DOWN, obstacle.getCoordinates()));
         keyListener.addKeyPressedCallback(List.of(RIGHT, D), () ->
-                tankGraphics.moveModel(MovementDirection.RIGHT, treeGraphics.getCoordinates()));
+                tankGraphics.moveModel(MovementDirection.RIGHT, obstacle.getCoordinates()));
     }
 
     @Override
@@ -79,7 +80,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         batch.begin();
 
         tankGraphics.render(batch);
-        treeGraphics.render(batch);
+        obstacle.render(batch);
 
         // submit all drawing requests
         batch.end();
@@ -103,7 +104,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     @Override
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
-        treeGraphics.dispose();
+        obstacle.dispose();
         tankGraphics.dispose();
         level.dispose();
         batch.dispose();

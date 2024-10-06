@@ -10,7 +10,7 @@ import ru.mipt.bit.platformer.model.TreeModel;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class TreeGraphics implements GraphicsObject {
+public class TreeGraphics implements Obstacle {
 
     private final Texture texture;
     private final TextureRegion graphics;
