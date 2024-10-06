@@ -10,6 +10,7 @@ import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.view.TankGraphics;
@@ -45,8 +46,8 @@ public class GameDesktopLauncher implements ApplicationListener {
         TiledMapTileLayer groundLayer = getSingleLayer(level);
         tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
 
-        treeGraphics = new TreeGraphics(groundLayer);
-        tankGraphics = new TankGraphics();
+        treeGraphics = new TreeGraphics(groundLayer, "images/greenTree.png", new GridPoint2(2, 3));
+        tankGraphics = new TankGraphics(0.4f, "images/tank_blue.png");
 
         keyListener.addKeyPressedCallback(List.of(UP, W), () ->
                 tankGraphics.moveModel(MovementDirection.UP, treeGraphics.getCoordinates()));

@@ -12,13 +12,17 @@ import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
 public class TreeGraphics implements GraphicsObject {
 
-    private final Texture texture = new Texture("images/greenTree.png");
-    private final TextureRegion graphics = new TextureRegion(texture);
-    private final Rectangle rectangle = createBoundingRectangle(graphics);
+    private final Texture texture;
+    private final TextureRegion graphics;
+    private final Rectangle rectangle;
 
-    private final TreeModel model = new TreeModel();
+    private final TreeModel model;
 
-    public TreeGraphics(TiledMapTileLayer groundLayer) {
+    public TreeGraphics(TiledMapTileLayer groundLayer, String texturePath, GridPoint2 coordinates) {
+        texture = new Texture(texturePath);
+        graphics = new TextureRegion(texture);
+        rectangle = createBoundingRectangle(graphics);
+        model = new TreeModel(coordinates);
         moveRectangleAtTileCenter(groundLayer, rectangle, model.getCoordinates());
     }
 

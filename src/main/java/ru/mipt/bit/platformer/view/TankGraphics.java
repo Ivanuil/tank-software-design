@@ -15,14 +15,21 @@ import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 public class TankGraphics implements GraphicsObject {
 
     // Texture decodes an image file and loads it into GPU memory, it represents a native resource
-    private final Texture texture = new Texture("images/tank_blue.png");
+    private final Texture texture;
     // TextureRegion represents Texture portion, there may be many TextureRegion instances of the same Texture
-    private final TextureRegion graphics = new TextureRegion(texture);
-    private final Rectangle rectangle = createBoundingRectangle(graphics);
+    private final TextureRegion graphics;
+    private final Rectangle rectangle;
 
-    private final TankModel model = new TankModel();
+    private final TankModel model = new TankModel(new GridPoint2(1, 1));
 
-    private static final float MOVEMENT_SPEED = 0.4f;
+    private final float movementSpeed;
+
+    public TankGraphics(float movementSpeed, String texturePath) {
+        this.movementSpeed = movementSpeed;
+        texture = new Texture(texturePath);
+        graphics = new TextureRegion(texture);
+        rectangle = createBoundingRectangle(graphics);
+    }
 
     public void render(Batch batch) {
         drawTextureRegionUnscaled(batch, graphics, rectangle, model.getRotation());
@@ -37,7 +44,7 @@ public class TankGraphics implements GraphicsObject {
         tileMovement.moveRectangleBetweenTileCenters(rectangle,
                 model.getCoordinates(), model.getDestinationCoordinates(), model.getMovementProgress());
 
-        model.updateMovementProgress(deltaTime, MOVEMENT_SPEED);
+        model.updateMovementProgress(deltaTime, movementSpeed);
     }
 
     public void moveModel(MovementDirection movementDirection, GridPoint2 obstacleCoordinates) {
