@@ -2,30 +2,27 @@ package ru.mipt.bit.platformer.model;
 
 import com.badlogic.gdx.math.GridPoint2;
 
-import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
-
 public enum MovementDirection {
 
-    UP, DOWN, LEFT, RIGHT;
+    UP(90f, new GridPoint2(0,1)),
+    DOWN(-90f, new GridPoint2(0, -1)),
+    LEFT(-180f, new GridPoint2(-1,0)),
+    RIGHT(0f, new GridPoint2(1, 0));
 
-    float getRotation() {
-        switch (this) {
-            case UP: return 90f;
-            case DOWN: return -90f;
-            case LEFT: return -180f;
-            case RIGHT: return 0f;
-        }
-        throw new RuntimeException("Unknown Movement Direction");
+    private final float rotation;
+    private final GridPoint2 movementVector;
+
+    MovementDirection(float rotation, GridPoint2 movementVector) {
+        this.rotation = rotation;
+        this.movementVector = movementVector;
     }
 
-    GridPoint2 getDestinationCoordinates(GridPoint2 coordinates) {
-        switch (this) {
-            case UP: return incrementedY(coordinates);
-            case DOWN: return decrementedY(coordinates);
-            case LEFT: return decrementedX(coordinates);
-            case RIGHT: return incrementedX(coordinates);
-        }
-        throw new RuntimeException("Unknown Movement Direction");
+    public float getRotation() {
+        return rotation;
+    }
+
+    public GridPoint2 getMovementVector() {
+        return new GridPoint2(movementVector);
     }
 
 }
