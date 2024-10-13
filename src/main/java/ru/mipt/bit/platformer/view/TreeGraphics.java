@@ -10,7 +10,7 @@ import ru.mipt.bit.platformer.model.TreeModel;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class TreeGraphics implements Obstacle {
+public class TreeGraphics implements GraphicsObject {
 
     private final Texture texture;
     private final TextureRegion graphics;
@@ -18,11 +18,11 @@ public class TreeGraphics implements Obstacle {
 
     private final TreeModel model;
 
-    public TreeGraphics(TiledMapTileLayer groundLayer, String texturePath, GridPoint2 coordinates) {
+    public TreeGraphics(TiledMapTileLayer groundLayer, String texturePath, TreeModel model) {
         texture = new Texture(texturePath);
         graphics = new TextureRegion(texture);
         rectangle = createBoundingRectangle(graphics);
-        model = new TreeModel(coordinates);
+        this.model = model;
         moveRectangleAtTileCenter(groundLayer, rectangle, model.getCoordinates());
     }
 
