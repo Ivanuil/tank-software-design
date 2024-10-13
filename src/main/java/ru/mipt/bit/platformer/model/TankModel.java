@@ -1,6 +1,10 @@
 package ru.mipt.bit.platformer.model;
 
 import com.badlogic.gdx.math.GridPoint2;
+import ru.mipt.bit.platformer.view.Obstacle;
+
+import java.util.Collection;
+import java.util.function.Predicate;
 
 import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
@@ -35,11 +39,12 @@ public class TankModel {
         return movementProgress;
     }
 
-    public void moveModel(MovementDirection movementDirection, GridPoint2 obstacleCoordinates) {
+    public void moveModel(MovementDirection movementDirection, Collection<Obstacle> obstacles) {
         if (isEqual(movementProgress, 1f)) {
             // check potential player destination for collision with obstacles
             GridPoint2 potentialDestination = new GridPoint2(coordinates).add(movementDirection.getMovementVector());
-            if (!obstacleCoordinates.equals(potentialDestination)) {
+            if (obstacles.stream()
+                    .noneMatch(obstacle -> obstacle.getCoordinates().equals(potentialDestination))) {
                 destinationCoordinates = potentialDestination;
                 movementProgress = 0f;
             }

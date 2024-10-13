@@ -9,6 +9,8 @@ import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.util.TileMovement;
 
+import java.util.Collection;
+
 import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
@@ -20,14 +22,15 @@ public class TankGraphics implements GraphicsObject {
     private final TextureRegion graphics;
     private final Rectangle rectangle;
 
-    private final TankModel model = new TankModel(new GridPoint2(1, 1));
+    private final TankModel model;
 
     private final float movementSpeed;
 
-    public TankGraphics(float movementSpeed, String texturePath) {
+    public TankGraphics(float movementSpeed, String texturePath, TankModel model) {
         this.movementSpeed = movementSpeed;
         texture = new Texture(texturePath);
         graphics = new TextureRegion(texture);
+        this.model = model;
         rectangle = createBoundingRectangle(graphics);
     }
 
@@ -47,8 +50,8 @@ public class TankGraphics implements GraphicsObject {
         model.updateMovementProgress(deltaTime, movementSpeed);
     }
 
-    public void moveModel(MovementDirection movementDirection, GridPoint2 obstacleCoordinates) {
-        model.moveModel(movementDirection, obstacleCoordinates);
+    public void moveModel(MovementDirection movementDirection, Collection<Obstacle> obstacles) {
+        model.moveModel(movementDirection, obstacles);
     }
 
 }
