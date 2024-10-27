@@ -14,9 +14,10 @@ import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.levelloaders.FileLevelLoader;
 import ru.mipt.bit.platformer.levelloaders.LevelLoader;
 import ru.mipt.bit.platformer.levelloaders.RandomisedLevelLoader;
+import ru.mipt.bit.platformer.model.AIController;
 import ru.mipt.bit.platformer.model.LevelModel;
 import ru.mipt.bit.platformer.model.MovementDirection;
-import ru.mipt.bit.platformer.model.TreeModel;
+import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.view.Obstacle;
 import ru.mipt.bit.platformer.view.TankGraphics;
 import ru.mipt.bit.platformer.util.KeyListener;
@@ -45,7 +46,8 @@ public class GameDesktopLauncher implements ApplicationListener {
 
     private Collection<Obstacle> obstacles;
     private Collection<TreeGraphics> treeGraphics;
-    private TankGraphics tankGraphics;
+    private TankGraphics playerTank;
+    private Collection<TankGraphics> npcTanks;
 
     private final LevelModel levelModel;
 
@@ -67,16 +69,19 @@ public class GameDesktopLauncher implements ApplicationListener {
         treeGraphics = levelModel.getTrees().stream()
                 .map(treeModel -> new TreeGraphics(groundLayer, "images/greenTree.png", treeModel))
                 .collect(Collectors.toList());;
-        tankGraphics = new TankGraphics(0.4f, "images/tank_blue.png", levelModel.getTank());
+        playerTank = new TankGraphics(0.4f, "images/tank_blue.png", levelModel.getPlayerTank());
+        npcTanks = levelModel.getNpcTanks().stream()
+                        .map(tankModel -> new TankGraphics(0.4f, "images/tank_blue.png", tankModel))
+                        .collect(Collectors.toList());
 
         keyListener.addKeyPressedCallback(List.of(UP, W), () ->
-                tankGraphics.moveModel(MovementDirection.UP, obstacles));
+                playerTank.moveModel(MovementDirection.UP));
         keyListener.addKeyPressedCallback(List.of(LEFT, A), () ->
-                tankGraphics.moveModel(MovementDirection.LEFT, obstacles));
+                playerTank.moveModel(MovementDirection.LEFT));
         keyListener.addKeyPressedCallback(List.of(DOWN, S), () ->
-                tankGraphics.moveModel(MovementDirection.DOWN, obstacles));
+                playerTank.moveModel(MovementDirection.DOWN));
         keyListener.addKeyPressedCallback(List.of(RIGHT, D), () ->
-                tankGraphics.moveModel(MovementDirection.RIGHT, obstacles));
+                playerTank.moveModel(MovementDirection.RIGHT));
     }
 
     @Override
@@ -89,8 +94,10 @@ public class GameDesktopLauncher implements ApplicationListener {
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         keyListener.checkPressedKeys(Gdx.input);
+        npcTanks.forEach(AIController::control);
 
-        tankGraphics.moveImage(tileMovement, deltaTime);
+        playerTank.moveImage(tileMovement, deltaTime);
+        npcTanks.forEach(tankGraphics -> tankGraphics.moveImage(tileMovement, deltaTime));
 
         // render each tile of the level
         levelRenderer.render();
@@ -98,8 +105,9 @@ public class GameDesktopLauncher implements ApplicationListener {
         // start recording all drawing commands
         batch.begin();
 
-        tankGraphics.render(batch);
+        playerTank.render(batch);
         treeGraphics.forEach(treeGraphics -> treeGraphics.render(batch));
+        npcTanks.forEach(tankGraphics -> tankGraphics.render(batch));
 
         // submit all drawing requests
         batch.end();
@@ -124,7 +132,8 @@ public class GameDesktopLauncher implements ApplicationListener {
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
         treeGraphics.forEach(TreeGraphics::dispose);
-        tankGraphics.dispose();
+        npcTanks.forEach(TankGraphics::dispose);
+        playerTank.dispose();
         level.dispose();
         batch.dispose();
     }
@@ -149,7 +158,8 @@ public class GameDesktopLauncher implements ApplicationListener {
             double obstacleDensity = Double.parseDouble(args[1]);
             int rowCount = Integer.parseInt(args[2]);
             int columnCount = Integer.parseInt(args[3]);
-            return new RandomisedLevelLoader(obstacleDensity, rowCount, columnCount);
+            int npcTanksCount = Integer.parseInt(args[4]);
+            return new RandomisedLevelLoader(obstacleDensity, npcTanksCount, rowCount, columnCount);
         } else {
             throw new RuntimeException("Level loader not specified");
         }

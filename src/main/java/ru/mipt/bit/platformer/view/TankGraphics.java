@@ -3,18 +3,14 @@ package ru.mipt.bit.platformer.view;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Rectangle;
 import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.util.TileMovement;
 
-import java.util.Collection;
-
-import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class TankGraphics implements GraphicsObject {
+public class TankGraphics implements TankGraphicsObject {
 
     // Texture decodes an image file and loads it into GPU memory, it represents a native resource
     private final Texture texture;
@@ -42,6 +38,7 @@ public class TankGraphics implements GraphicsObject {
         texture.dispose();
     }
 
+    @Override
     public void moveImage(TileMovement tileMovement, float deltaTime) {
         // calculate interpolated player screen coordinates
         tileMovement.moveRectangleBetweenTileCenters(rectangle,
@@ -50,8 +47,9 @@ public class TankGraphics implements GraphicsObject {
         model.updateMovementProgress(deltaTime, movementSpeed);
     }
 
-    public void moveModel(MovementDirection movementDirection, Collection<Obstacle> obstacles) {
-        model.moveModel(movementDirection, obstacles);
+    @Override
+    public void moveModel(MovementDirection movementDirection) {
+        model.moveModel(movementDirection);
     }
 
 }

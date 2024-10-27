@@ -2,34 +2,57 @@ package ru.mipt.bit.platformer.model;
 
 import ru.mipt.bit.platformer.view.Obstacle;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class LevelModel {
 
     private Collection<TreeModel> trees;
-    private TankModel tank;
+    private TankModel playerTank;
+    private Collection<TankModel> npcTanks;
 
-    private final int rowCount;
-    private final int columnCount;
+    private int rowCount;
+    private int columnCount;
 
-    public LevelModel(Collection<TreeModel> trees, TankModel tank, int rowCount, int columnCount) {
+    public LevelModel() {
+    }
+
+    public void setTrees(Collection<TreeModel> trees) {
         this.trees = trees;
-        this.tank = tank;
+    }
+
+    public void setPlayerTank(TankModel playerTank) {
+        this.playerTank = playerTank;
+    }
+
+    public void setLevelSize(int rowCount, int columnCount) {
         this.rowCount = rowCount;
         this.columnCount = columnCount;
     }
 
     public Collection<? extends Obstacle> getObstacles() {
-        return List.copyOf(trees);
+        List<Obstacle> obstacles = new ArrayList<>();
+        obstacles.addAll(trees);
+        obstacles.addAll(npcTanks);
+        obstacles.add(getPlayerTank());
+        return obstacles;
     }
 
     public Collection<TreeModel> getTrees() {
         return List.copyOf(trees);
     }
 
-    public TankModel getTank() {
-        return tank;
+    public TankModel getPlayerTank() {
+        return playerTank;
+    }
+
+    public void setNpcTanks(Collection<TankModel> npcTanks) {
+        this.npcTanks = npcTanks;
+    }
+
+    public Collection<TankModel> getNpcTanks() {
+        return new ArrayList<>(npcTanks);
     }
 
 }

@@ -29,6 +29,7 @@ public class FileLevelLoader implements LevelLoader {
     }
 
     private static LevelModel readInitializerFile(BufferedReader br) throws IOException {
+        LevelModel levelModel = new LevelModel();
         List<TreeModel> trees = new ArrayList<>();
         TankModel tankModel = null;
         int rowCounter = 0;
@@ -53,7 +54,7 @@ public class FileLevelLoader implements LevelLoader {
                     case 'X' : {
                         if (tankModel != null)
                             throw new RuntimeException("Multiple tanks in initializer file");
-                        tankModel = new TankModel(new GridPoint2(rowCounter, columnCounter));
+                        tankModel = new TankModel(new GridPoint2(rowCounter, columnCounter), levelModel);
                         break;
                     }
                 }
@@ -63,7 +64,10 @@ public class FileLevelLoader implements LevelLoader {
         }
         if (tankModel == null)
             throw new RuntimeException("No tank in initializer file");
-        return new LevelModel(trees, tankModel, rowCounter, columnsInLevel);
+        levelModel.setTrees(trees);
+        levelModel.setPlayerTank(tankModel);
+        levelModel.setLevelSize(rowCounter, columnsInLevel);
+        return levelModel;
     }
 
 }

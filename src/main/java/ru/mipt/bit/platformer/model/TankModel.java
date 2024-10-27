@@ -4,12 +4,12 @@ import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.view.Obstacle;
 
 import java.util.Collection;
-import java.util.function.Predicate;
+import java.util.List;
 
 import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
-public class TankModel {
+public class TankModel implements Obstacle {
 
     // set player initial position
     private GridPoint2 destinationCoordinates = new GridPoint2();
@@ -18,8 +18,11 @@ public class TankModel {
     private float rotation = 0f;
     private float movementProgress = 1f;
 
-    public TankModel(GridPoint2 initialCoordinates) {
+    private final LevelModel level;
+
+    public TankModel(GridPoint2 initialCoordinates, LevelModel level) {
         destinationCoordinates = new GridPoint2(initialCoordinates);
+        this.level = level;
         coordinates = new GridPoint2(destinationCoordinates);
     }
 
@@ -39,12 +42,13 @@ public class TankModel {
         return movementProgress;
     }
 
-    public void moveModel(MovementDirection movementDirection, Collection<Obstacle> obstacles) {
+    public void moveModel(MovementDirection movementDirection) {
         if (isEqual(movementProgress, 1f)) {
             // check potential player destination for collision with obstacles
             GridPoint2 potentialDestination = new GridPoint2(coordinates).add(movementDirection.getMovementVector());
-            if (obstacles.stream()
-                    .noneMatch(obstacle -> obstacle.getCoordinates().equals(potentialDestination))) {
+            if (level.getObstacles().stream()
+                    .noneMatch(obstacle -> obstacle.getTakenCoordinates().stream()
+                            .anyMatch(potentialDestination::equals))) {
                 destinationCoordinates = potentialDestination;
                 movementProgress = 0f;
             }
@@ -58,6 +62,11 @@ public class TankModel {
             // record that the player has reached his/her destination
             coordinates.set(destinationCoordinates);
         }
+    }
+
+    @Override
+    public Collection<GridPoint2> getTakenCoordinates() {
+        return List.of(coordinates, destinationCoordinates);
     }
 
 }
