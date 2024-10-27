@@ -48,7 +48,7 @@ public class TankModel implements Obstacle {
             GridPoint2 potentialDestination = new GridPoint2(coordinates).add(movementDirection.getMovementVector());
             if (level.getObstacles().stream()
                     .noneMatch(obstacle -> obstacle.getTakenCoordinates().stream()
-                            .anyMatch(potentialDestination::equals))) {
+                            .anyMatch(potentialDestination::equals)) && !level.isOutOfBorder(potentialDestination)) {
                 destinationCoordinates = potentialDestination;
                 movementProgress = 0f;
             }

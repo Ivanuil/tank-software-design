@@ -1,5 +1,6 @@
 package ru.mipt.bit.platformer.model;
 
+import com.badlogic.gdx.math.GridPoint2;
 import ru.mipt.bit.platformer.view.Obstacle;
 
 import java.util.ArrayList;
@@ -53,6 +54,14 @@ public class LevelModel {
 
     public Collection<TankModel> getNpcTanks() {
         return new ArrayList<>(npcTanks);
+    }
+
+    public boolean isOutOfBorder(GridPoint2 coordinates) {
+        if (coordinates.x < 0 || coordinates.y < 0)
+            return true;
+        if (coordinates.x >= rowCount || coordinates.y >= columnCount)
+            return true;
+        return false;
     }
 
 }
