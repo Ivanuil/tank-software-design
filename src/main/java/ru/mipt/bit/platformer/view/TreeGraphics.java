@@ -34,6 +34,11 @@ public class TreeGraphics implements GraphicsObject {
         texture.dispose();
     }
 
+    @Override
+    public Rectangle getRectangle() {
+        return rectangle;
+    }
+
     public GridPoint2 getCoordinates() {
         return model.getCoordinates();
     }

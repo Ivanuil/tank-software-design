@@ -9,7 +9,7 @@ import java.util.List;
 import static com.badlogic.gdx.math.MathUtils.isEqual;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.continueProgress;
 
-public class TankModel implements Obstacle {
+public class TankModel implements Obstacle, ObjectWithHealthModel {
 
     // set player initial position
     private GridPoint2 destinationCoordinates = new GridPoint2();
@@ -17,6 +17,7 @@ public class TankModel implements Obstacle {
     private final GridPoint2 coordinates;
     private float rotation = 0f;
     private float movementProgress = 1f;
+    private float health = 100f;
 
     private final LevelModel level;
 
@@ -69,4 +70,8 @@ public class TankModel implements Obstacle {
         return List.of(coordinates, destinationCoordinates);
     }
 
+    @Override
+    public float getHealth() {
+        return health;
+    }
 }

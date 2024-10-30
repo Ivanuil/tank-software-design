@@ -5,12 +5,13 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import ru.mipt.bit.platformer.model.MovementDirection;
+import ru.mipt.bit.platformer.model.ObjectWithHealthModel;
 import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.util.TileMovement;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class TankGraphics implements TankGraphicsObject {
+public class TankGraphics implements TankGraphicsObject, ObjectWithHealthGraphics {
 
     // Texture decodes an image file and loads it into GPU memory, it represents a native resource
     private final Texture texture;
@@ -32,10 +33,16 @@ public class TankGraphics implements TankGraphicsObject {
 
     public void render(Batch batch) {
         drawTextureRegionUnscaled(batch, graphics, rectangle, model.getRotation());
+        renderHealthbar(batch);
     }
 
     public void dispose() {
         texture.dispose();
+    }
+
+    @Override
+    public Rectangle getRectangle() {
+        return rectangle;
     }
 
     @Override
@@ -50,6 +57,16 @@ public class TankGraphics implements TankGraphicsObject {
     @Override
     public void moveModel(MovementDirection movementDirection) {
         model.moveModel(movementDirection);
+    }
+
+    @Override
+    public ObjectWithHealthModel getModel() {
+        return (ObjectWithHealthModel) model;
+    }
+
+    @Override
+    public void renderHealthbar(Batch batch) {
+        ObjectWithHealthGraphics.super.renderHealthbar(batch);
     }
 
 }

@@ -2,6 +2,7 @@ package ru.mipt.bit.platformer;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -21,6 +22,7 @@ import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.model.commands.Command;
 import ru.mipt.bit.platformer.model.commands.MoveTankCommand;
 import ru.mipt.bit.platformer.model.commands.MoveTankCommandProducer;
+import ru.mipt.bit.platformer.model.commands.SwitchHealthBarToggleCommand;
 import ru.mipt.bit.platformer.view.Obstacle;
 import ru.mipt.bit.platformer.view.TankGraphics;
 import ru.mipt.bit.platformer.util.KeyListener;
@@ -82,6 +84,9 @@ public class GameDesktopLauncher implements ApplicationListener {
         keyListener.addKeyPressedCallback(List.of(LEFT, A), new MoveTankCommand(playerTank, MovementDirection.LEFT));
         keyListener.addKeyPressedCallback(List.of(DOWN, S), new MoveTankCommand(playerTank, MovementDirection.DOWN));
         keyListener.addKeyPressedCallback(List.of(RIGHT, D), new MoveTankCommand(playerTank, MovementDirection.RIGHT));
+        keyListener.addKeyPressedCallback(List.of(L), new SwitchHealthBarToggleCommand(), false);
+
+
 
         aiController = new AIController(MoveTankCommandProducer.produceAllCommands(npcTanks));
     }
