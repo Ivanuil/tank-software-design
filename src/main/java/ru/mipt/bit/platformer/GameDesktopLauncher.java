@@ -19,6 +19,7 @@ import ru.mipt.bit.platformer.model.LevelModel;
 import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.model.commands.Command;
+import ru.mipt.bit.platformer.model.commands.MoveTankCommand;
 import ru.mipt.bit.platformer.model.commands.MoveTankCommandProducer;
 import ru.mipt.bit.platformer.view.Obstacle;
 import ru.mipt.bit.platformer.view.TankGraphics;
@@ -77,14 +78,10 @@ public class GameDesktopLauncher implements ApplicationListener {
                         .map(tankModel -> new TankGraphics(0.4f, "images/tank_blue.png", tankModel))
                         .collect(Collectors.toList());
 
-        keyListener.addKeyPressedCallback(List.of(UP, W), () ->
-                playerTank.moveModel(MovementDirection.UP));
-        keyListener.addKeyPressedCallback(List.of(LEFT, A), () ->
-                playerTank.moveModel(MovementDirection.LEFT));
-        keyListener.addKeyPressedCallback(List.of(DOWN, S), () ->
-                playerTank.moveModel(MovementDirection.DOWN));
-        keyListener.addKeyPressedCallback(List.of(RIGHT, D), () ->
-                playerTank.moveModel(MovementDirection.RIGHT));
+        keyListener.addKeyPressedCallback(List.of(UP, W), new MoveTankCommand(playerTank, MovementDirection.UP));
+        keyListener.addKeyPressedCallback(List.of(LEFT, A), new MoveTankCommand(playerTank, MovementDirection.LEFT));
+        keyListener.addKeyPressedCallback(List.of(DOWN, S), new MoveTankCommand(playerTank, MovementDirection.DOWN));
+        keyListener.addKeyPressedCallback(List.of(RIGHT, D), new MoveTankCommand(playerTank, MovementDirection.RIGHT));
 
         aiController = new AIController(MoveTankCommandProducer.produceAllCommands(npcTanks));
     }

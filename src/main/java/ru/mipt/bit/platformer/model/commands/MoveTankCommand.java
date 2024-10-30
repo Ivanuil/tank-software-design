@@ -8,7 +8,7 @@ public class MoveTankCommand implements Command {
     private final TankGraphics tank;
     private final MovementDirection direction;
 
-    protected MoveTankCommand(TankGraphics tank, MovementDirection direction) {
+    public MoveTankCommand(TankGraphics tank, MovementDirection direction) {
         this.tank = tank;
         this.direction = direction;
     }

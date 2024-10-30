@@ -1,6 +1,7 @@
 package ru.mipt.bit.platformer.util;
 
 import com.badlogic.gdx.Input;
+import ru.mipt.bit.platformer.model.commands.Command;
 
 import java.util.*;
 
@@ -8,33 +9,33 @@ public class KeyListener {
 
     List<KeyBinding> keyBindings = new ArrayList<>();
 
-    public void addKeyPressedCallback(Collection<Integer> keyCodes, Runnable runnable) {
-        keyBindings.add(new KeyBinding(keyCodes, runnable));
+    public void addKeyPressedCallback(Collection<Integer> keyCodes, Command command) {
+        keyBindings.add(new KeyBinding(keyCodes, command));
     }
 
     public void checkPressedKeys(Input input) {
         for (var binding : keyBindings) {
             if (binding.getKeyCodes().stream().anyMatch(input::isKeyPressed))
-                binding.getCallBack().run();
+                binding.getCallBack().execute();
         }
     }
 
     private static class KeyBinding {
 
-        public KeyBinding(Collection<Integer> keyCodes, Runnable callBack) {
+        public KeyBinding(Collection<Integer> keyCodes, Command command) {
             this.keyCodes = keyCodes;
-            this.callBack = callBack;
+            this.command = command;
         }
 
         private final Collection<Integer> keyCodes;
-        private final Runnable callBack;
+        private final Command command;
 
         public Collection<Integer> getKeyCodes() {
             return keyCodes;
         }
 
-        public Runnable getCallBack() {
-            return callBack;
+        public Command getCallBack() {
+            return command;
         }
     }
 
