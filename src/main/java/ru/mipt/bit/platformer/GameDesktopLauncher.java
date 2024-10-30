@@ -18,6 +18,8 @@ import ru.mipt.bit.platformer.model.AIController;
 import ru.mipt.bit.platformer.model.LevelModel;
 import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.model.TankModel;
+import ru.mipt.bit.platformer.model.commands.Command;
+import ru.mipt.bit.platformer.model.commands.MoveTankCommandProducer;
 import ru.mipt.bit.platformer.view.Obstacle;
 import ru.mipt.bit.platformer.view.TankGraphics;
 import ru.mipt.bit.platformer.util.KeyListener;
@@ -47,8 +49,9 @@ public class GameDesktopLauncher implements ApplicationListener {
     private Collection<Obstacle> obstacles;
     private Collection<TreeGraphics> treeGraphics;
     private TankGraphics playerTank;
-    private Collection<TankGraphics> npcTanks;
+    private List<TankGraphics> npcTanks;
 
+    private AIController aiController;
     private final LevelModel levelModel;
 
     public GameDesktopLauncher(LevelLoader levelLoader) {
@@ -82,6 +85,8 @@ public class GameDesktopLauncher implements ApplicationListener {
                 playerTank.moveModel(MovementDirection.DOWN));
         keyListener.addKeyPressedCallback(List.of(RIGHT, D), () ->
                 playerTank.moveModel(MovementDirection.RIGHT));
+
+        aiController = new AIController(MoveTankCommandProducer.produceAllCommands(npcTanks));
     }
 
     @Override
@@ -94,7 +99,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         keyListener.checkPressedKeys(Gdx.input);
-        npcTanks.forEach(AIController::control);
+        aiController.control();
 
         playerTank.moveImage(tileMovement, deltaTime);
         npcTanks.forEach(tankGraphics -> tankGraphics.moveImage(tileMovement, deltaTime));
@@ -152,7 +157,6 @@ public class GameDesktopLauncher implements ApplicationListener {
         String levelLoaderName = args[0];
         if (FileLevelLoader.class.getName().endsWith(levelLoaderName)) {
             File intitializerFile = new File(args[1]);
-            System.out.println(new File(args[1]).getAbsolutePath());
             return new FileLevelLoader(intitializerFile);
         } else if (RandomisedLevelLoader.class.getName().endsWith(levelLoaderName)) {
             double obstacleDensity = Double.parseDouble(args[1]);

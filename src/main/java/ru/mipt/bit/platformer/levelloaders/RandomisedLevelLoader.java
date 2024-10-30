@@ -44,7 +44,6 @@ public class RandomisedLevelLoader implements LevelLoader {
                 if (checkIfCoordinatesAreTaken(coordinates, playerTank, trees, npcTanks))
                     continue;
                 npcTanks.add(new TankModel(coordinates, levelModel));
-                System.out.println(coordinates.x + " " + coordinates.y);
                 break;
             }
         }

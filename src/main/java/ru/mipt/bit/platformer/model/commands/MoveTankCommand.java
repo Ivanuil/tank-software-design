@@ -1,18 +1,21 @@
 package ru.mipt.bit.platformer.model.commands;
 
 import ru.mipt.bit.platformer.model.MovementDirection;
-import ru.mipt.bit.platformer.model.TankModel;
+import ru.mipt.bit.platformer.view.TankGraphics;
 
-public interface MoveTankCommand extends Command {
+public class MoveTankCommand implements Command {
 
-    default MoveTankCommand getCommand(TankModel tank, MovementDirection direction) {
-        switch (direction) {
-            case UP: return new MoveTankUpCommand(tank);
-            case DOWN: return new MoveTankDownCommand(tank);
-            case LEFT: return new MoveTankLeftCommand(tank);
-            case RIGHT: return new MoveTankRightCommand(tank);
-        }
-        return null;
+    private final TankGraphics tank;
+    private final MovementDirection direction;
+
+    protected MoveTankCommand(TankGraphics tank, MovementDirection direction) {
+        this.tank = tank;
+        this.direction = direction;
+    }
+
+    @Override
+    public void execute() {
+        tank.moveModel(direction);
     }
 
 }
