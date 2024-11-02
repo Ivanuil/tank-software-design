@@ -11,7 +11,7 @@ import ru.mipt.bit.platformer.util.TileMovement;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class TankGraphics implements TankGraphicsObject, ObjectWithHealthGraphics {
+public class TankGraphics implements MovingGraphicsObject {
 
     // Texture decodes an image file and loads it into GPU memory, it represents a native resource
     private final Texture texture;
@@ -33,7 +33,6 @@ public class TankGraphics implements TankGraphicsObject, ObjectWithHealthGraphic
 
     public void render(Batch batch) {
         drawTextureRegionUnscaled(batch, graphics, rectangle, model.getRotation());
-        renderHealthbar(batch);
     }
 
     public void dispose() {
@@ -61,12 +60,7 @@ public class TankGraphics implements TankGraphicsObject, ObjectWithHealthGraphic
 
     @Override
     public ObjectWithHealthModel getModel() {
-        return (ObjectWithHealthModel) model;
-    }
-
-    @Override
-    public void renderHealthbar(Batch batch) {
-        ObjectWithHealthGraphics.super.renderHealthbar(batch);
+        return model;
     }
 
 }

@@ -2,7 +2,6 @@ package ru.mipt.bit.platformer;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -18,22 +17,16 @@ import ru.mipt.bit.platformer.levelloaders.RandomisedLevelLoader;
 import ru.mipt.bit.platformer.model.AIController;
 import ru.mipt.bit.platformer.model.LevelModel;
 import ru.mipt.bit.platformer.model.MovementDirection;
-import ru.mipt.bit.platformer.model.TankModel;
-import ru.mipt.bit.platformer.model.commands.Command;
 import ru.mipt.bit.platformer.model.commands.MoveTankCommand;
 import ru.mipt.bit.platformer.model.commands.MoveTankCommandProducer;
-import ru.mipt.bit.platformer.model.commands.SwitchHealthBarToggleCommand;
-import ru.mipt.bit.platformer.view.Obstacle;
-import ru.mipt.bit.platformer.view.TankGraphics;
+import ru.mipt.bit.platformer.view.*;
+import ru.mipt.bit.platformer.view.commands.SwitchHealthBarToggleCommand;
 import ru.mipt.bit.platformer.util.KeyListener;
 import ru.mipt.bit.platformer.util.TileMovement;
-import ru.mipt.bit.platformer.view.TreeGraphics;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.Input.Keys.*;
@@ -51,8 +44,8 @@ public class GameDesktopLauncher implements ApplicationListener {
 
     private Collection<Obstacle> obstacles;
     private Collection<TreeGraphics> treeGraphics;
-    private TankGraphics playerTank;
-    private List<TankGraphics> npcTanks;
+    private MovingGraphicsObject playerTank;
+    private List<MovingGraphicsObject> npcTanks;
 
     private AIController aiController;
     private final LevelModel levelModel;
@@ -74,10 +67,12 @@ public class GameDesktopLauncher implements ApplicationListener {
         obstacles = (Collection<Obstacle>) levelModel.getObstacles();
         treeGraphics = levelModel.getTrees().stream()
                 .map(treeModel -> new TreeGraphics(groundLayer, "images/greenTree.png", treeModel))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
         playerTank = new TankGraphics(0.4f, "images/tank_blue.png", levelModel.getPlayerTank());
+        playerTank = new HealthBarDecorator(playerTank);
         npcTanks = levelModel.getNpcTanks().stream()
                         .map(tankModel -> new TankGraphics(0.4f, "images/tank_blue.png", tankModel))
+                        .map(HealthBarDecorator::new)
                         .collect(Collectors.toList());
 
         keyListener.addKeyPressedCallback(List.of(UP, W), new MoveTankCommand(playerTank, MovementDirection.UP));
@@ -85,8 +80,6 @@ public class GameDesktopLauncher implements ApplicationListener {
         keyListener.addKeyPressedCallback(List.of(DOWN, S), new MoveTankCommand(playerTank, MovementDirection.DOWN));
         keyListener.addKeyPressedCallback(List.of(RIGHT, D), new MoveTankCommand(playerTank, MovementDirection.RIGHT));
         keyListener.addKeyPressedCallback(List.of(L), new SwitchHealthBarToggleCommand(), false);
-
-
 
         aiController = new AIController(MoveTankCommandProducer.produceAllCommands(npcTanks));
     }
@@ -139,7 +132,7 @@ public class GameDesktopLauncher implements ApplicationListener {
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
         treeGraphics.forEach(TreeGraphics::dispose);
-        npcTanks.forEach(TankGraphics::dispose);
+        npcTanks.forEach(MovingGraphicsObject::dispose);
         playerTank.dispose();
         level.dispose();
         batch.dispose();
