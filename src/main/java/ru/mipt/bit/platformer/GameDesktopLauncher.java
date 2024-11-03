@@ -11,10 +11,28 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
+import ru.mipt.bit.platformer.levelloaders.FileLevelLoader;
+import ru.mipt.bit.platformer.levelloaders.LevelLoader;
+import ru.mipt.bit.platformer.levelloaders.RandomisedLevelLoader;
+import ru.mipt.bit.platformer.model.AIController;
+import ru.mipt.bit.platformer.model.LevelModel;
 import ru.mipt.bit.platformer.model.MovementDirection;
-import ru.mipt.bit.platformer.model.Tank;
-import ru.mipt.bit.platformer.model.Tree;
+import ru.mipt.bit.platformer.model.TankModel;
+import ru.mipt.bit.platformer.model.commands.Command;
+import ru.mipt.bit.platformer.model.commands.MoveTankCommand;
+import ru.mipt.bit.platformer.model.commands.MoveTankCommandProducer;
+import ru.mipt.bit.platformer.view.Obstacle;
+import ru.mipt.bit.platformer.view.TankGraphics;
+import ru.mipt.bit.platformer.util.KeyListener;
 import ru.mipt.bit.platformer.util.TileMovement;
+import ru.mipt.bit.platformer.view.TreeGraphics;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
@@ -27,9 +45,19 @@ public class GameDesktopLauncher implements ApplicationListener {
     private TiledMap level;
     private MapRenderer levelRenderer;
     private TileMovement tileMovement;
+    private final KeyListener keyListener = new KeyListener();
 
-    private Tree tree;
-    private Tank tank;
+    private Collection<Obstacle> obstacles;
+    private Collection<TreeGraphics> treeGraphics;
+    private TankGraphics playerTank;
+    private List<TankGraphics> npcTanks;
+
+    private AIController aiController;
+    private final LevelModel levelModel;
+
+    public GameDesktopLauncher(LevelLoader levelLoader) {
+        levelModel = levelLoader.loadLevel();
+    }
 
     @Override
     public void create() {
@@ -41,8 +69,21 @@ public class GameDesktopLauncher implements ApplicationListener {
         TiledMapTileLayer groundLayer = getSingleLayer(level);
         tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
 
-        tree = new Tree(groundLayer);
-        tank = new Tank();
+        obstacles = (Collection<Obstacle>) levelModel.getObstacles();
+        treeGraphics = levelModel.getTrees().stream()
+                .map(treeModel -> new TreeGraphics(groundLayer, "images/greenTree.png", treeModel))
+                .collect(Collectors.toList());;
+        playerTank = new TankGraphics(0.4f, "images/tank_blue.png", levelModel.getPlayerTank());
+        npcTanks = levelModel.getNpcTanks().stream()
+                        .map(tankModel -> new TankGraphics(0.4f, "images/tank_blue.png", tankModel))
+                        .collect(Collectors.toList());
+
+        keyListener.addKeyPressedCallback(List.of(UP, W), new MoveTankCommand(playerTank, MovementDirection.UP));
+        keyListener.addKeyPressedCallback(List.of(LEFT, A), new MoveTankCommand(playerTank, MovementDirection.LEFT));
+        keyListener.addKeyPressedCallback(List.of(DOWN, S), new MoveTankCommand(playerTank, MovementDirection.DOWN));
+        keyListener.addKeyPressedCallback(List.of(RIGHT, D), new MoveTankCommand(playerTank, MovementDirection.RIGHT));
+
+        aiController = new AIController(MoveTankCommandProducer.produceAllCommands(npcTanks));
     }
 
     @Override
@@ -54,20 +95,11 @@ public class GameDesktopLauncher implements ApplicationListener {
         // get time passed since the last render
         float deltaTime = Gdx.graphics.getDeltaTime();
 
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            tank.moveModel(MovementDirection.UP, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            tank.moveModel(MovementDirection.LEFT, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            tank.moveModel(MovementDirection.DOWN, tree.getCoordinates());
-        }
-        if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            tank.moveModel(MovementDirection.RIGHT, tree.getCoordinates());
-        }
+        keyListener.checkPressedKeys(Gdx.input);
+        aiController.control();
 
-        tank.moveImage(tileMovement, deltaTime);
+        playerTank.moveImage(tileMovement, deltaTime);
+        npcTanks.forEach(tankGraphics -> tankGraphics.moveImage(tileMovement, deltaTime));
 
         // render each tile of the level
         levelRenderer.render();
@@ -75,8 +107,9 @@ public class GameDesktopLauncher implements ApplicationListener {
         // start recording all drawing commands
         batch.begin();
 
-        tank.render(batch);
-        tree.render(batch);
+        playerTank.render(batch);
+        treeGraphics.forEach(treeGraphics -> treeGraphics.render(batch));
+        npcTanks.forEach(tankGraphics -> tankGraphics.render(batch));
 
         // submit all drawing requests
         batch.end();
@@ -100,8 +133,9 @@ public class GameDesktopLauncher implements ApplicationListener {
     @Override
     public void dispose() {
         // dispose of all the native resources (classes which implement com.badlogic.gdx.utils.Disposable)
-        tree.dispose();
-        tank.dispose();
+        treeGraphics.forEach(TreeGraphics::dispose);
+        npcTanks.forEach(TankGraphics::dispose);
+        playerTank.dispose();
         level.dispose();
         batch.dispose();
     }
@@ -110,6 +144,26 @@ public class GameDesktopLauncher implements ApplicationListener {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         // level width: 10 tiles x 128px, height: 8 tiles x 128px
         config.setWindowedMode(1280, 1024);
-        new Lwjgl3Application(new GameDesktopLauncher(), config);
+
+        LevelLoader levelLoader = getLevelLoader(args);
+
+        new Lwjgl3Application(new GameDesktopLauncher(levelLoader), config);
     }
+
+    private static LevelLoader getLevelLoader(String[] args) {
+        String levelLoaderName = args[0];
+        if (FileLevelLoader.class.getName().endsWith(levelLoaderName)) {
+            File intitializerFile = new File(args[1]);
+            return new FileLevelLoader(intitializerFile);
+        } else if (RandomisedLevelLoader.class.getName().endsWith(levelLoaderName)) {
+            double obstacleDensity = Double.parseDouble(args[1]);
+            int rowCount = Integer.parseInt(args[2]);
+            int columnCount = Integer.parseInt(args[3]);
+            int npcTanksCount = Integer.parseInt(args[4]);
+            return new RandomisedLevelLoader(obstacleDensity, npcTanksCount, rowCount, columnCount);
+        } else {
+            throw new RuntimeException("Level loader not specified");
+        }
+    }
+
 }
