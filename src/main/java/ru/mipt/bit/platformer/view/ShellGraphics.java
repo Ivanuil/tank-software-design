@@ -5,12 +5,14 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import ru.mipt.bit.platformer.model.MovementDirection;
+import ru.mipt.bit.platformer.model.ShellModel;
 import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.util.TileMovement;
 
-import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
+import static ru.mipt.bit.platformer.util.GdxGameUtils.createBoundingRectangle;
+import static ru.mipt.bit.platformer.util.GdxGameUtils.drawTextureRegionUnscaled;
 
-public class TankGraphics implements MovingGraphicsObject {
+public class ShellGraphics implements MovingGraphicsObject {
 
     // Texture decodes an image file and loads it into GPU memory, it represents a native resource
     private final Texture texture;
@@ -18,11 +20,11 @@ public class TankGraphics implements MovingGraphicsObject {
     private final TextureRegion graphics;
     private final Rectangle rectangle;
 
-    private final TankModel model;
+    private final ShellModel model;
 
     private final float movementSpeed;
 
-    public TankGraphics(float movementSpeed, String texturePath, TankModel model) {
+    public ShellGraphics(float movementSpeed, String texturePath, ShellModel model) {
         this.movementSpeed = movementSpeed;
         texture = new Texture(texturePath);
         graphics = new TextureRegion(texture);
@@ -54,12 +56,16 @@ public class TankGraphics implements MovingGraphicsObject {
 
     @Override
     public void moveModel(MovementDirection movementDirection) {
-        model.moveModel(movementDirection);
+        model.moveModel();
     }
 
+    // TODO: remove
     @Override
     public TankModel getModel() {
-        return model;
+        return null;
     }
 
+    public ShellModel getShellModel() {
+        return model;
+    }
 }

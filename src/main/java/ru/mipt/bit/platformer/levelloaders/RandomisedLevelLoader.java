@@ -1,9 +1,7 @@
 package ru.mipt.bit.platformer.levelloaders;
 
 import com.badlogic.gdx.math.GridPoint2;
-import ru.mipt.bit.platformer.model.LevelModel;
-import ru.mipt.bit.platformer.model.TankModel;
-import ru.mipt.bit.platformer.model.TreeModel;
+import ru.mipt.bit.platformer.model.*;
 
 import java.util.ArrayList;
 import java.util.List;

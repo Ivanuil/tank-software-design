@@ -2,6 +2,8 @@ package ru.mipt.bit.platformer.model;
 
 import com.badlogic.gdx.math.GridPoint2;
 
+import java.util.Arrays;
+
 public enum MovementDirection {
 
     UP(90f, new GridPoint2(0,1)),
@@ -23,6 +25,12 @@ public enum MovementDirection {
 
     public GridPoint2 getMovementVector() {
         return new GridPoint2(movementVector);
+    }
+
+    public static MovementDirection getDirection(float rotation) {
+        return Arrays.stream(values())
+                .filter(movementDirection -> movementDirection.getRotation() == rotation)
+                .findFirst().orElse(null);
     }
 
 }

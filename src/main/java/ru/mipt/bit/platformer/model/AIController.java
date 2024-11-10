@@ -1,14 +1,14 @@
 package ru.mipt.bit.platformer.model;
 
-import ru.mipt.bit.platformer.model.commands.MoveTankCommand;
+import ru.mipt.bit.platformer.model.commands.Command;
 
 import java.util.List;
 
 public class AIController {
 
-    private final List<List<MoveTankCommand>> commandsList;
+    private final List<List<Command>> commandsList;
 
-    public AIController(List<List<MoveTankCommand>> commandsList) {
+    public AIController(List<List<Command>> commandsList) {
         this.commandsList = commandsList;
     }
 

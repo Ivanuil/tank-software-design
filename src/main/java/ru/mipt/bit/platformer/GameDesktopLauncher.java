@@ -14,11 +14,10 @@ import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.levelloaders.FileLevelLoader;
 import ru.mipt.bit.platformer.levelloaders.LevelLoader;
 import ru.mipt.bit.platformer.levelloaders.RandomisedLevelLoader;
-import ru.mipt.bit.platformer.model.AIController;
-import ru.mipt.bit.platformer.model.LevelModel;
-import ru.mipt.bit.platformer.model.MovementDirection;
+import ru.mipt.bit.platformer.model.*;
 import ru.mipt.bit.platformer.model.commands.MoveTankCommand;
-import ru.mipt.bit.platformer.model.commands.MoveTankCommandProducer;
+import ru.mipt.bit.platformer.model.commands.MoveAndShootTankCommandProducer;
+import ru.mipt.bit.platformer.model.commands.ShootCommand;
 import ru.mipt.bit.platformer.view.*;
 import ru.mipt.bit.platformer.view.commands.SwitchHealthBarToggleCommand;
 import ru.mipt.bit.platformer.util.KeyListener;
@@ -26,6 +25,7 @@ import ru.mipt.bit.platformer.util.TileMovement;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +33,7 @@ import static com.badlogic.gdx.Input.Keys.*;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public class GameDesktopLauncher implements ApplicationListener {
+public class GameDesktopLauncher implements ApplicationListener, ShellUpdateSubscriber, TankUpdateSubscriber {
 
     private Batch batch;
 
@@ -42,10 +42,10 @@ public class GameDesktopLauncher implements ApplicationListener {
     private TileMovement tileMovement;
     private final KeyListener keyListener = new KeyListener();
 
-    private Collection<Obstacle> obstacles;
     private Collection<TreeGraphics> treeGraphics;
     private MovingGraphicsObject playerTank;
     private List<MovingGraphicsObject> npcTanks;
+    private List<ShellGraphics> shells = new LinkedList<>();
 
     private AIController aiController;
     private final LevelModel levelModel;
@@ -64,15 +64,18 @@ public class GameDesktopLauncher implements ApplicationListener {
         TiledMapTileLayer groundLayer = getSingleLayer(level);
         tileMovement = new TileMovement(groundLayer, Interpolation.smooth);
 
-        obstacles = (Collection<Obstacle>) levelModel.getObstacles();
         treeGraphics = levelModel.getTrees().stream()
                 .map(treeModel -> new TreeGraphics(groundLayer, "images/greenTree.png", treeModel))
                 .collect(Collectors.toList());
         playerTank = new TankGraphics(0.4f, "images/tank_blue.png", levelModel.getPlayerTank());
         playerTank = new HealthBarDecorator(playerTank);
+        playerTank.getModel().setNewShellSubscriber(this);
+        playerTank.getModel().setTankUpdateSubscriber(this);
         npcTanks = levelModel.getNpcTanks().stream()
                         .map(tankModel -> new TankGraphics(0.4f, "images/tank_blue.png", tankModel))
                         .map(HealthBarDecorator::new)
+                        .peek(healthBarDecorator -> healthBarDecorator.getModel().setNewShellSubscriber(GameDesktopLauncher.this))
+                        .peek(healthBarDecorator -> healthBarDecorator.getModel().setTankUpdateSubscriber(GameDesktopLauncher.this))
                         .collect(Collectors.toList());
 
         keyListener.addKeyPressedCallback(List.of(UP, W), new MoveTankCommand(playerTank, MovementDirection.UP));
@@ -80,8 +83,9 @@ public class GameDesktopLauncher implements ApplicationListener {
         keyListener.addKeyPressedCallback(List.of(DOWN, S), new MoveTankCommand(playerTank, MovementDirection.DOWN));
         keyListener.addKeyPressedCallback(List.of(RIGHT, D), new MoveTankCommand(playerTank, MovementDirection.RIGHT));
         keyListener.addKeyPressedCallback(List.of(L), new SwitchHealthBarToggleCommand(), false);
+        keyListener.addKeyPressedCallback(List.of(SPACE), new ShootCommand(levelModel.getPlayerTank()), false);
 
-        aiController = new AIController(MoveTankCommandProducer.produceAllCommands(npcTanks));
+        aiController = new AIController(MoveAndShootTankCommandProducer.produceAllCommands(npcTanks));
     }
 
     @Override
@@ -98,6 +102,7 @@ public class GameDesktopLauncher implements ApplicationListener {
 
         playerTank.moveImage(tileMovement, deltaTime);
         npcTanks.forEach(tankGraphics -> tankGraphics.moveImage(tileMovement, deltaTime));
+        List.copyOf(shells).forEach(shellGraphics -> shellGraphics.moveImage(tileMovement, deltaTime));
 
         // render each tile of the level
         levelRenderer.render();
@@ -108,6 +113,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         playerTank.render(batch);
         treeGraphics.forEach(treeGraphics -> treeGraphics.render(batch));
         npcTanks.forEach(tankGraphics -> tankGraphics.render(batch));
+        shells.forEach(shellGraphics -> shellGraphics.render(batch));
 
         // submit all drawing requests
         batch.end();
@@ -136,6 +142,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         playerTank.dispose();
         level.dispose();
         batch.dispose();
+        shells.forEach(ShellGraphics::dispose);
     }
 
     public static void main(String[] args) {
@@ -161,6 +168,37 @@ public class GameDesktopLauncher implements ApplicationListener {
             return new RandomisedLevelLoader(obstacleDensity, npcTanksCount, rowCount, columnCount);
         } else {
             throw new RuntimeException("Level loader not specified");
+        }
+    }
+
+    @Override
+    public void onNewShell(ShellModel shell) {
+        shells.add(new ShellGraphics(0.4f, "images/shell.png", shell));
+        shell.setShellUpdateSubscriber(this);
+    }
+
+    @Override
+    public void onShellDestroyed(ShellModel shell) {
+        ShellGraphics shellGraphics = shells.stream()
+                .filter(shellGraphics1 -> shellGraphics1.getShellModel() == shell)
+                .findFirst().get();
+        shellGraphics.dispose();
+        shells.remove(shellGraphics);
+    }
+
+    @Override
+    public void onTankDestroyed(TankModel tankModel) {
+        MovingGraphicsObject tankGraphics = npcTanks.stream()
+                .filter(movingGraphicsObject -> movingGraphicsObject.getModel() == tankModel)
+                .findFirst().orElse(null);
+        if (tankGraphics != null) {
+            tankGraphics.dispose();
+            npcTanks.remove(tankGraphics);
+            return;
+        }
+
+        if (playerTank.getModel() == tankModel) {
+            throw new RuntimeException("Game over!");
         }
     }
 

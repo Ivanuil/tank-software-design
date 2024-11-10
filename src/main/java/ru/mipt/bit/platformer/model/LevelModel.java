@@ -12,6 +12,7 @@ public class LevelModel {
     private Collection<TreeModel> trees;
     private TankModel playerTank;
     private Collection<TankModel> npcTanks;
+    private final Collection<ShellModel> shells = new ArrayList<>();
 
     private int rowCount;
     private int columnCount;
@@ -37,6 +38,7 @@ public class LevelModel {
         obstacles.addAll(trees);
         obstacles.addAll(npcTanks);
         obstacles.add(getPlayerTank());
+        obstacles.addAll(shells);
         return obstacles;
     }
 
@@ -62,6 +64,14 @@ public class LevelModel {
         if (coordinates.x >= rowCount || coordinates.y >= columnCount)
             return true;
         return false;
+    }
+
+    public void addShell(ShellModel shell) {
+        shells.add(shell);
+    }
+
+    public void removeShell(ShellModel shell) {
+        shells.remove(shell);
     }
 
 }

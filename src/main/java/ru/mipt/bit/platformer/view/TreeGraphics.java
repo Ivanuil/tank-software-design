@@ -39,8 +39,4 @@ public class TreeGraphics implements GraphicsObject {
         return rectangle;
     }
 
-    public GridPoint2 getCoordinates() {
-        return model.getCoordinates();
-    }
-
 }

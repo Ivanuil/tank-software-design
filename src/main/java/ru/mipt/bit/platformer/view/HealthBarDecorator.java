@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import ru.mipt.bit.platformer.model.MovementDirection;
 import ru.mipt.bit.platformer.model.ObjectWithHealthModel;
+import ru.mipt.bit.platformer.model.TankModel;
 import ru.mipt.bit.platformer.util.GdxGameUtils;
 import ru.mipt.bit.platformer.util.TileMovement;
 
@@ -20,7 +21,7 @@ public class HealthBarDecorator implements MovingGraphicsObject {
     }
 
     @Override
-    public ObjectWithHealthModel getModel() {
+    public TankModel getModel() {
         return wrappee.getModel();
     }
 
@@ -54,7 +55,7 @@ public class HealthBarDecorator implements MovingGraphicsObject {
         if (!HealthBarsToggle.getToggle())
             return;
 
-        var healthbarTexture = getHealthbarTexture(getModel().getHealth());
+        var healthbarTexture = getHealthbarTexture(((ObjectWithHealthModel) getModel()).getHealth() / 100);
         var rectangle = createRectangle();
         GdxGameUtils.drawTextureRegionUnscaled(batch, healthbarTexture, rectangle, 0f);
     }
