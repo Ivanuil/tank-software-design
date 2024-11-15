@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Interpolation;
+import org.springframework.stereotype.Component;
 import ru.mipt.bit.platformer.model.LevelModel;
 import ru.mipt.bit.platformer.model.ShellModel;
 import ru.mipt.bit.platformer.model.TankModel;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.createSingleLayerMapRenderer;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.getSingleLayer;
 
+@Component
 public class LevelGraphics implements ShellUpdateSubscriber, TankUpdateSubscriber {
 
     private TiledMap level;
